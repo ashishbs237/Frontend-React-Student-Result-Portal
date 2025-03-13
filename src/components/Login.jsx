@@ -31,7 +31,7 @@ const Login = () => {
     if (isSuccess && data) {
       dispatch(setUser(data.user));
       console.log(data)
-      navigate(data.user.role === "admin" ? "/admin" : "/student");
+      navigate(data.user.role === "admin" ? "/admin/dashboard" : "/student/view-result");
     }
   }, [data, isSuccess]);
 

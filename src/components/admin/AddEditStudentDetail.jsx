@@ -1,5 +1,5 @@
 // src/components/AddEditStudentDetail.jsx
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -9,11 +9,14 @@ import {
   TextField,
 } from "@mui/material";
 import { useFormik } from "formik";
-import { validationSchema } from "../utils/validations";
+import { validationSchema } from "../../utils/validations";
+import ConfirmationDialog from "../shared/ConfirmationDialog";
 
 
 
 const AddEditStudentDetail = ({ open, onClose, onSubmit, editData }) => {
+const [isOpen, setOpen] = useState(false);
+
   const { values, handleChange, resetForm, handleSubmit, errors, touched } =
     useFormik({
       initialValues: {
@@ -31,6 +34,7 @@ const AddEditStudentDetail = ({ open, onClose, onSubmit, editData }) => {
     });
 
   return (
+    <>
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{editData ? "Edit Student" : "Add Student"}</DialogTitle>
       <DialogContent>
@@ -71,12 +75,24 @@ const AddEditStudentDetail = ({ open, onClose, onSubmit, editData }) => {
           <Button onClick={onClose} color="secondary">
             Cancel
           </Button>
-          <Button type="submit" color="primary" onClick={() => handleSubmit()}>
+          <Button type="submit" color="primary" onClick={() => setOpen(true)}>
             {editData ? "Update" : "Add"}
           </Button>
         </DialogActions>
       </DialogContent>
     </Dialog>
+      {/* Delete confirmation dialog  */}
+      <ConfirmationDialog
+        open={isOpen}
+        onClose={() => setOpen(false)}
+        type="add"
+        message="Are you sure you want to add?"
+        onConfirm={() => {
+          handleSubmit();
+          setOpen(false)
+        }}
+      />
+    </>
   );
 };
 

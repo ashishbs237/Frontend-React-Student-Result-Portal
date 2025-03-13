@@ -36,9 +36,6 @@ const Home = () => {
             {/* Right Section - Login Options */}
             <Grid item xs={12} md={6} textAlign="center">
               <Box display="flex" flexDirection="column" gap={2}>
-                {/* <Button variant="contained" color="primary" onClick={() => navigate("/login?role=student")}>
-                  Student Login
-                </Button> */}
                 <Login />
               </Box>
             </Grid>

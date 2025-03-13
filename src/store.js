@@ -12,7 +12,7 @@ const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
-      .concat(authApi.middleware),
+      .concat(authApi.middleware).concat(studentApi.middleware),
 });
 
 setupListeners(store.dispatch);

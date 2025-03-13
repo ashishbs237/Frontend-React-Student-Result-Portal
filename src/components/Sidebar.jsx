@@ -1,11 +1,30 @@
 // src/components/Sidebar.jsx
 import React, { useState } from "react";
-import { Drawer, List, ListItem, ListItemText, ListItemIcon, IconButton, AppBar, Toolbar, Typography } from "@mui/material";
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  IconButton,
+  AppBar,
+  Toolbar,
+  Typography,
+} from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-// import { logout } from "../features/auth/authSlice";
-import { Home, Lock, ExitToApp, School, Dashboard, Assessment, Settings, Menu as MenuIcon } from "@mui/icons-material";
-import {menuItems} from "../utils/sidebarMenuItems";
+import { logout } from "../features/authSlice";
+import {
+  Home,
+  Lock,
+  ExitToApp,
+  School,
+  Dashboard,
+  Assessment,
+  Settings,
+  Menu as MenuIcon,
+} from "@mui/icons-material";
+import { menuItems } from "../utils/sidebarMenuItems";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -14,8 +33,8 @@ const Sidebar = () => {
   const [mobileOpen, setMobileOpen] = useState(false); // State for mobile sidebar
 
   const handleLogout = () => {
-    // dispatch(logout());
-    navigate("/login");
+    dispatch(logout());
+    navigate("/");
     setMobileOpen(false); // Close drawer on logout
   };
 
@@ -25,20 +44,58 @@ const Sidebar = () => {
 
   const drawerContent = (
     <List>
-      {menuItems
-        .filter((item) => item.role === "all" || item.role === user?.role)
-        .map((item) => (
-          <ListItem button key={item.text} onClick={() => { navigate(item.path); setMobileOpen(false); }}>
-            <ListItemIcon>{item.icon}</ListItemIcon>
+    {menuItems
+      .filter((item) => item.role === "all" || item.role === user?.role)
+      .map((item) => {
+        const isActive = location.pathname === item.path; // Check if active
+        return (
+          <ListItem
+            button
+            key={item.text}
+            onClick={() => {
+              navigate(item.path);
+              setMobileOpen(false);
+            }}
+            sx={{
+              borderRadius: "8px",
+              margin: "5px",
+              transition: "background 0.3s ease",
+              backgroundColor: isActive ? "#1976d2" : "transparent", // Active state
+              color: isActive ? "#fff" : "#333",
+              "&:hover": {
+                backgroundColor: isActive ? "#1565c0" : "#f5f5f5", // Hover effect
+                cursor: "pointer",
+              },
+            }}
+          >
+            <ListItemIcon sx={{ color: isActive ? "#fff" : "#333" }}>
+              {item.icon}
+            </ListItemIcon>
             <ListItemText primary={item.text} />
           </ListItem>
-        ))}
+        );
+      })}
 
-      <ListItem button onClick={handleLogout}>
-        <ListItemIcon><ExitToApp /></ListItemIcon>
-        <ListItemText primary="Logout" />
-      </ListItem>
-    </List>
+    {/* Logout Button */}
+    <ListItem
+      button
+      onClick={handleLogout}
+      sx={{
+        borderRadius: "8px",
+        margin: "5px",
+        transition: "background 0.3s ease",
+        "&:hover": {
+          backgroundColor: "#ffebee",
+          cursor: "pointer",
+        },
+      }}
+    >
+      <ListItemIcon sx={{ color: "#d32f2f" }}>
+        <ExitToApp />
+      </ListItemIcon>
+      <ListItemText primary="Logout" sx={{ color: "#d32f2f" }} />
+    </ListItem>
+  </List>
   );
 
   return (
