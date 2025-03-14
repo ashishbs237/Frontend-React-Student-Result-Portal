@@ -7,13 +7,19 @@ import { Delete } from "@mui/icons-material";
 // import { useGetStudentsQuery, useAddStudentMutation, useDeleteStudentMutation } from "../api/studentApi";
 import { toast } from "react-toastify";
 import AddEditStudentDetail from "../../components/admin/AddEditStudentDetail";
-import { useAddStudentMutation } from "../../api/studentApi";
+import {
+  useAddStudentMutation,
+  useDeleteStudentMutation,
+} from "../../api/studentApi";
 import StudentList from "../../components/admin/StudentList";
+import ActionMenu from "../../components/ActionMenu";
+import { manageStudentMenu } from "../../utils/menuItems";
+import ConfirmationDialog from "../../components/shared/ConfirmationDialog";
 
 const ManageStudents = () => {
   const [addStudent] = useAddStudentMutation();
-  const [open, setOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [action, setAction] = useState({ action: "", data: [] });
+  const [deleteStudent, { isLoading: isDeleting }] = useDeleteStudentMutation();
 
   const handleAddStudent = async (newStudent) => {
     try {
@@ -24,23 +30,66 @@ const ManageStudents = () => {
     }
   };
 
+  const deleteSelected = () => {
+    console.log("Delete Selected : ");
+  };
+
+  const deleteAll = () => {
+    console.log("Delete All Student : ");
+  };
+
+  const handleDeleteStudent = async () => {
+    try {
+      await deleteStudent(action.data[0]).unwrap();
+      toast.success("Student deleted!");
+    } catch (err) {
+      toast.error("Failed to delete student");
+    }
+  };
+
   return (
     <Container>
       <Typography variant="h5" gutterBottom>
         Manage Students
       </Typography>
-      <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
-        Add Student
-      </Button>
+      <div className="d-flex justify-content-between">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setAction({ ...action, action: "edit" })}
+        >
+          Add Student
+        </Button>
+        <ActionMenu
+          menuLabel="Options"
+          menuItems={manageStudentMenu(deleteSelected, deleteAll)}
+        />
+      </div>
 
-      <StudentList />
+      <StudentList
+        setAction={(e) => {
+          setAction({ action: e?.action, data: e?.data });
+        }}
+      />
 
       {/* Add Student Modal */}
       <AddEditStudentDetail
-        open={open}
-        onClose={() => setOpen(false)}
+        open={action.action === "edit"}
+        onClose={() => setAction({})}
         onSubmit={handleAddStudent}
-        initialData={selectedStudent}
+        editData={action?.data?.[0]}
+      />
+
+      {/* Delete confirmation dialog  */}
+      <ConfirmationDialog
+        open={action?.action === "delete"}
+        onClose={() => setAction({})}
+        type="delete"
+        message="Are you sure you want to delete?"
+        onConfirm={() => {
+          handleDeleteStudent();
+          setAction({});
+        }}
       />
     </Container>
   );

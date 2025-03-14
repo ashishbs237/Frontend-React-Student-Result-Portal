@@ -24,7 +24,7 @@ import {
   Settings,
   Menu as MenuIcon,
 } from "@mui/icons-material";
-import { menuItems } from "../utils/sidebarMenuItems";
+import { sidebarMenu } from "../utils/menuItems";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ const Sidebar = () => {
 
   const drawerContent = (
     <List>
-    {menuItems
+    {sidebarMenu
       .filter((item) => item.role === "all" || item.role === user?.role)
       .map((item) => {
         const isActive = location.pathname === item.path; // Check if active
