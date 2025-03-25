@@ -24,9 +24,10 @@ export const studentApi = createApi({
     }),
 
     deleteStudent: builder.mutation({
-      query: (id) => ({
-        url: `/manage-students/${id}`,
+      query: (payload) => ({
+        url: `/manage-students`,
         method: "DELETE",
+        body : payload
       }),
       invalidatesTags: ["Students"], // Auto-refetch after delete
     }),

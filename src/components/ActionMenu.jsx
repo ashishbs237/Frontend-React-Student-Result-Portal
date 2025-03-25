@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Menu, MenuItem } from "@mui/material";
 
-const ActionMenu = ({ menuLabel, menuItems }) => {
+const ActionMenu = ({ menuLabel, menuItems, selectedStudents }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -34,7 +34,7 @@ const ActionMenu = ({ menuLabel, menuItems }) => {
       >
         {menuItems.map((item, index) => (
           <MenuItem
-          disabled = {item.disabled}
+          disabled = {!selectedStudents || item.disabled}
             key={index}
             onClick={() => {
               handleClose();

@@ -55,3 +55,4 @@ export const manageStudentMenu = (deleteSelected, deleteAll) => [
   { label: "Delete Selected", onClick: deleteSelected , disabled: false },
   { label: "Delete All", onClick: deleteAll , disabled : true },
 ];
+

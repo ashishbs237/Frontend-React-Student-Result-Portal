@@ -3,49 +3,99 @@ import React, { useState } from "react";
 
 import { Button, Container, IconButton, Typography } from "@mui/material";
 import { Delete } from "@mui/icons-material";
-
-// import { useGetStudentsQuery, useAddStudentMutation, useDeleteStudentMutation } from "../api/studentApi";
 import { toast } from "react-toastify";
 import AddEditStudentDetail from "../../components/admin/AddEditStudentDetail";
 import {
   useAddStudentMutation,
   useDeleteStudentMutation,
+  useGetStudentsQuery,
 } from "../../api/studentApi";
-import StudentList from "../../components/admin/StudentList";
 import ActionMenu from "../../components/ActionMenu";
 import { manageStudentMenu } from "../../utils/menuItems";
 import ConfirmationDialog from "../../components/shared/ConfirmationDialog";
+import EditIcon from "@mui/icons-material/Edit";
+import CustomDataGrid from "../../components/CustomeDataGrid";
 
 const ManageStudents = () => {
   const [addStudent] = useAddStudentMutation();
-  const [action, setAction] = useState({ action: "", data: [] });
+  const [selectedStudent, setSelectedStudents] = useState(null);
   const [deleteStudent, { isLoading: isDeleting }] = useDeleteStudentMutation();
+  const { data, isLoading, error, isFetching } = useGetStudentsQuery();
+  const [rowSelectionModel, setRowSelectionModel] = useState();
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const handleAddStudent = async (newStudent) => {
     try {
       await addStudent(newStudent).unwrap();
       toast.success("Student added successfully!");
     } catch (err) {
-      toast.error("Failed to add student");
+      toast.error(err.data.message);
     }
   };
 
   const deleteSelected = () => {
-    console.log("Delete Selected : ");
+    handleDeleteStudent("selected");
   };
 
   const deleteAll = () => {
-    console.log("Delete All Student : ");
+    handleDeleteStudent("all");
   };
 
-  const handleDeleteStudent = async () => {
+  const handleDeleteStudent = async (type = "default") => {
+    let payload = {};
+
+    if (type === "default") {
+      payload = { studentsIds: [selectedStudent._id] };
+    }
+    if (type === "all") {
+      payload = { type };
+    }
+    if (type === "selected") {
+      payload = { studentsIds: rowSelectionModel };
+    }
+    console.log("Payload : ", payload);
     try {
-      await deleteStudent(action.data[0]).unwrap();
+      await deleteStudent(payload).unwrap();
       toast.success("Student deleted!");
     } catch (err) {
       toast.error("Failed to delete student");
     }
   };
+
+  const columnsDefs = [
+    { field: "name", headerName: "Name", width: 200 },
+    { field: "email", headerName: "Email", width: 200 },
+    { field: "phone", headerName: "Phone", width: 150 },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 100,
+      sortable: false,
+      renderCell: (params) => (
+        <>
+          <IconButton
+            color="error"
+            onClick={() => {
+              setSelectedStudents(params.row);
+              setIsDeleteOpen(true);
+            }}
+          >
+            <Delete />
+          </IconButton>
+          <IconButton
+            color="primary"
+            onClick={() => {
+              setSelectedStudents(params.row);
+              setIsEditOpen(true);
+            }}
+          >
+            <EditIcon />
+          </IconButton>
+        </>
+      ),
+    },
+  ];
 
   return (
     <Container>
@@ -56,39 +106,48 @@ const ManageStudents = () => {
         <Button
           variant="contained"
           color="primary"
-          onClick={() => setAction({ ...action, action: "edit" })}
+          onClick={() => setIsEditOpen(true)}
         >
           Add Student
         </Button>
         <ActionMenu
           menuLabel="Options"
+          selectedStudents={rowSelectionModel?.length || 0}
           menuItems={manageStudentMenu(deleteSelected, deleteAll)}
         />
       </div>
 
-      <StudentList
-        setAction={(e) => {
-          setAction({ action: e?.action, data: e?.data });
+      {/* Student Listing */}
+      <CustomDataGrid
+        columns={columnsDefs}
+        rows={data?.data || []}
+        pageSize={5}
+        rowSelectionModel={rowSelectionModel}
+        onRowSelectionModelChange={(e) => {
+          setRowSelectionModel(e);
         }}
       />
 
       {/* Add Student Modal */}
       <AddEditStudentDetail
-        open={action.action === "edit"}
-        onClose={() => setAction({})}
-        onSubmit={handleAddStudent}
-        editData={action?.data?.[0]}
+        open={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        onSubmit={(e) => {
+          handleAddStudent(e);
+          setSelectedStudents(null);
+        }}
+        editData={selectedStudent}
       />
 
       {/* Delete confirmation dialog  */}
       <ConfirmationDialog
-        open={action?.action === "delete"}
-        onClose={() => setAction({})}
+        open={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
         type="delete"
         message="Are you sure you want to delete?"
         onConfirm={() => {
           handleDeleteStudent();
-          setAction({});
+          setIsDeleteOpen(false);
         }}
       />
     </Container>
